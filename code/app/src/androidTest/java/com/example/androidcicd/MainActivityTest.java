@@ -102,7 +102,8 @@ public class MainActivityTest {
     }
 
     @Test
-    public void appShouldDisplayExistingMoviesOnLaunch() {
+    public void appShouldDisplayExistingMoviesOnLaunch() throws InterruptedException {
+        Thread.sleep(500);
         // Check that the initial data is loaded
         onView(withText("Oppenheimer")).check(matches(isDisplayed()));
         onView(withText("Barbie")).check(matches(isDisplayed()));
