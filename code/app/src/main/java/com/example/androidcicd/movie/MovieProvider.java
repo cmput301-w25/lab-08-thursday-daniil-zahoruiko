@@ -1,9 +1,14 @@
 package com.example.androidcicd.movie;
 
+import android.util.Log;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -77,6 +82,12 @@ public class MovieProvider {
     public void deleteMovie(Movie movie) {
         DocumentReference docRef = movieCollection.document(movie.getId());
         docRef.delete();
+    }
+
+    public Task<Boolean> movieExists(String title) {
+        return movieCollection.whereEqualTo("title", title)
+                .get()
+                .continueWith(queryDocumentSnapshot -> queryDocumentSnapshot.isSuccessful() && !queryDocumentSnapshot.getResult().isEmpty());
     }
 
     public boolean validMovie(Movie movie, DocumentReference docRef) {
