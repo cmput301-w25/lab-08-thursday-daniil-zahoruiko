@@ -65,13 +65,14 @@ public class MovieProviderTest {
     }
 
     @Test
-    public void testDeleteMovie() {
+    public void testDeleteMovie() throws InterruptedException {
         // Create movie and set our id
         Movie movie = new Movie("Oppenheimer", "Thriller/Historical Drama", 2023);
         movie.setId("123");
 
         // Call the delete movie and verify the firebase delete method was called.
         movieProvider.deleteMovie(movie);
+        Thread.sleep(500);
         verify(mockDocRef).delete();
     }
 
