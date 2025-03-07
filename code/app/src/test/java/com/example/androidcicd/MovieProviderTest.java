@@ -28,10 +28,6 @@ public class MovieProviderTest {
 
     private MovieProvider movieProvider;
 
-//    public static void setInstanceForTesting(FirebaseFirestore firestore) {
-//        MovieProvider movieProvider = new MovieProvider(firestore);
-//    }
-
     @Before
     public void setUp() {
         // Start up mocks
@@ -41,7 +37,7 @@ public class MovieProviderTest {
         when(mockMovieCollection.document()).thenReturn(mockDocRef);
         when(mockMovieCollection.document(anyString())).thenReturn(mockDocRef);
         // Setup the movie provider
-        // MovieProvider.setInstanceForTesting(mockFirestore);
+        MovieProvider.setInstanceForTesting(mockFirestore);
         movieProvider = MovieProvider.getInstance(mockFirestore);
     }
 
