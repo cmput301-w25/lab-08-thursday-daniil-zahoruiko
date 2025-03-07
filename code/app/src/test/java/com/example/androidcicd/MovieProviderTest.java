@@ -68,7 +68,6 @@ public class MovieProviderTest {
 
         // Call the delete movie and verify the firebase delete method was called.
         movieProvider.deleteMovie(movie);
-        Thread.sleep(500);
         verify(mockDocRef).delete();
     }
 
