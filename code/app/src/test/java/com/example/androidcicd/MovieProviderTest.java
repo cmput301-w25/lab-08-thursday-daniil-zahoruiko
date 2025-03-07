@@ -1,15 +1,23 @@
 package com.example.androidcicd;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.androidcicd.movie.Movie;
 import com.example.androidcicd.movie.MovieProvider;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +33,12 @@ public class MovieProviderTest {
 
     @Mock
     private DocumentReference mockDocRef;
+    @Mock
+    private Query mockQuery;
+    @Mock
+    private QuerySnapshot mockQuerySnapshot;
+    @Mock
+    private Task<QuerySnapshot> mockTask;
 
     private MovieProvider movieProvider;
 
@@ -92,5 +106,34 @@ public class MovieProviderTest {
 
         // Call update movie, which should throw an error due to having an empty name
         movieProvider.updateMovie(movie, "", "Another Genre", 2026);
+    }
+
+    @Test
+    public void testMovieExists() {
+        when(mockMovieCollection.whereEqualTo(anyString(), any())).thenReturn(mockQuery);
+        when(mockQuery.get()).thenReturn(mockTask);
+        when(mockTask.getResult()).thenReturn(mockQuerySnapshot);
+        when(mockTask.isSuccessful()).thenReturn(true);
+        when(mockTask.continueWith(any(Continuation.class))).thenAnswer(invocation -> {
+            Continuation<QuerySnapshot, Boolean> continuation = invocation.getArgument(0);
+            TaskCompletionSource<Boolean> taskCompletionSource = new TaskCompletionSource<>();
+
+            boolean result = continuation.then(mockTask);
+            taskCompletionSource.setResult(result);
+
+            return taskCompletionSource.getTask();
+        });
+
+
+        when(mockQuerySnapshot.isEmpty()).thenReturn(true);
+
+        Task<Boolean> movieExists = movieProvider.movieExists("Oppenheimer");
+        assertFalse(movieExists.getResult());
+
+        when(mockQuerySnapshot.isEmpty()).thenReturn(false);
+
+        movieExists = movieProvider.movieExists("Oppenheimer");
+
+        assertTrue(movieExists.getResult());
     }
 }

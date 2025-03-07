@@ -5,6 +5,7 @@ import static android.text.TextUtils.isEmpty;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -18,6 +19,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.androidcicd.R;
 import com.example.androidcicd.utils.TextValidator;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MovieDialogFragment extends DialogFragment {
@@ -96,6 +99,8 @@ public class MovieDialogFragment extends DialogFragment {
                 .setPositiveButton("Continue", null)
                 .create();
 
+        Context context = getContext();
+
         // Change dialog so it does not automatically dismiss, but only when valid data is entered
         dialog.setOnShowListener(d -> {
             Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -105,12 +110,25 @@ public class MovieDialogFragment extends DialogFragment {
                 String title = editMovieName.getText().toString().trim();
                 String genre = editMovieGenre.getText().toString().trim();
                 int year = Integer.parseInt(editMovieYear.getText().toString().trim());
-                if (tag != null && tag.equals( "Movie Details")) {
-                    movieProvider.updateMovie(movie, title, genre, year);
-                } else {
-                    movieProvider.addMovie(new Movie(title, genre, year));
-                }
-                dialog.dismiss();
+                movieProvider.movieExists(title).addOnCompleteListener(existsTask -> {
+                    if(existsTask.isSuccessful() && existsTask.getResult()) {
+                        new AlertDialog.Builder(context)
+                                .setMessage(String.format("Movie %s already exists.", title))
+                                .setPositiveButton("OK", (dialog2, which) -> {
+                                    dialog2.dismiss();
+                                    dialog.dismiss();
+                                })
+                                .create()
+                                .show();
+                    }
+                    else {
+                        if (tag != null && tag.equals( "Movie Details")) {
+                            movieProvider.updateMovie(movie, title, genre, year);
+                        } else {
+                            movieProvider.addMovie(new Movie(title, genre, year));
+                        }
+                    }
+                });
             });
         });
         return dialog;
