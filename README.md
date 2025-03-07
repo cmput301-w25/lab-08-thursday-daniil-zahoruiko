@@ -3,8 +3,8 @@
 
 ## Student Details
 
-- **Full Name:** `<Enter name>`
-- **CCID:** `<Enter ccid>`
+- **Full Name:** Daniil Zahoruiko
+- **CCID:** zahoruik
 
 ## References and Resources
 
